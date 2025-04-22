@@ -5,11 +5,35 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 import java.util.Map;
+
+import edu.austral.ingsis.clifford.System;
+import edu.austral.ingsis.clifford.commands.Cd;
+import edu.austral.ingsis.clifford.commands.Ls;
+import edu.austral.ingsis.clifford.commands.Mkdir;
+import edu.austral.ingsis.clifford.commands.Pwd;
+import edu.austral.ingsis.clifford.commands.Rm;
+import edu.austral.ingsis.clifford.commands.Touch;
+
+import edu.austral.ingsis.clifford.Directory;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class FileSystemTests {
 
-  private final FileSystemRunner runner = commands -> List.of();
+  private FileSystemRunner runner;
+  private Directory rootDir;
+  @BeforeEach
+  public void setUp() {
+    rootDir = new Directory("/");
+    System context = new System(rootDir);
+    runner = new FileSystemRunner(Map.of(
+            "pwd", argument -> new Pwd(context).execute(),
+            "cd", argument -> new Cd(context, argument).execute(),
+            "ls", argument -> new Ls(context, argument).execute(),
+            "touch", argument -> new Touch(context, argument).execute(),
+            "mkdir", argument -> new Mkdir(context, argument).execute(),
+            "rm", argument -> new Rm(context, argument).execute()));
+  }
 
   private void executeTest(List<Map.Entry<String, String>> commandsAndResults) {
     final List<String> commands = commandsAndResults.stream().map(Map.Entry::getKey).toList();
@@ -58,7 +82,7 @@ public class FileSystemTests {
             entry("cd emily", "moved to directory 'emily'"),
             entry("touch elizabeth.txt", "'elizabeth.txt' file created"),
             entry("mkdir t-bone", "'t-bone' directory created"),
-            entry("ls", "t-bone elizabeth.txt"),
+            entry("ls", "elizabeth.txt t-bone"),
             entry("rm t-bone", "cannot remove 't-bone', is a directory"),
             entry("rm --recursive t-bone", "'t-bone' removed"),
             entry("ls", "elizabeth.txt"),
