@@ -2,6 +2,7 @@ package edu.austral.ingsis.clifford.commands;
 
 
 import edu.austral.ingsis.clifford.Directory;
+import edu.austral.ingsis.clifford.Element;
 import edu.austral.ingsis.clifford.System;
 
 public class Cd {
@@ -13,48 +14,73 @@ public class Cd {
         this.path = path;
     }
 
-    public String execute() {
+    public System execute() {
         Directory currentDir = context.getCurrentDirectory();
+        String currentPath = context.currentPath();
 
         if (path.equals(".")) {
+            return new System(currentPath, context.root(), "moved to directory '" + currentDir.getName() + "'");
+        } else if (path.equals("..")) {
+            Directory parentDir = findParent(context.root());
+            if (parentDir != null) {
 
-            return "moved to directory '" + currentDir.getName() + "'";
-        }
-        else if (path.equals("..")) {
-            if (currentDir.getParent() != null) {
-                context.setCurrentDirectory(currentDir.getParent());
-                currentDir = context.getCurrentDirectory();
-                return "moved to directory '" + currentDir.getName() + "'";
+                String parentPath = getParentPath();
+
+                return new System(parentPath, context.root(),"moved to directory '" + parentDir.getName() + "'");
             } else {
-                return "moved to directory '" + currentDir.getName() + "'";
+                return new System(currentPath, context.root(),"moved to directory '" + currentDir.getName() + "'");
             }
-        }
-        else{
+        } else {
             String[] parts = path.split("/");
             Directory first;
 
             if (path.startsWith("/")) {
-                first = currentDir.getRoot();
-            }
-            else{
+                first = context.root();
+            } else {
                 first = currentDir;
             }
 
+            String newPath = first.getName();
             for (String part : parts) {
                 if (part.isEmpty() || part.equals(".")) continue;
 
                 var child = first.getChild(part);
                 if (child == null || !child.isDirectory()) {
-                    return "'" + part + "' directory does not exist";
+                    return new System(currentPath, context.root(),"'" + part + "' directory does not exist");
                 }
                 first = (Directory) child;
+                if (newPath.equals("/")) { newPath += first.getName(); }
+                else { newPath += "/" + first.getName(); }
             }
-
-            context.setCurrentDirectory(first);
-            currentDir = context.getCurrentDirectory();
-            return "moved to directory '" + currentDir.getName() + "'";
+            return new System(newPath, context.root(),"moved to directory '" + first.getName() + "'");
         }
     }
 
+    private String getParentPath() {
+        int lastSlash = context.currentPath().lastIndexOf('/');
+        String parentPath;
 
+        if (lastSlash == 0) { parentPath = "/";}
+        else { parentPath = path.substring(0, lastSlash);}
+        return parentPath;
+    }
+
+
+    private Directory findParent(Directory root) {
+        String path = context.currentPath();
+        if (path.equals("/")) {
+            return context.root();
+        }
+        String parentPath = path.substring(0, path.lastIndexOf('/'));
+
+        if (parentPath.equals("/") || parentPath.isEmpty()) { return root; }
+
+        String[] parts = parentPath.split("/");
+        Directory currentDir = root;
+
+        for (String part : parts) {
+            currentDir = (Directory) currentDir.getChild(part);
+        }
+        return currentDir;
+    }
 }

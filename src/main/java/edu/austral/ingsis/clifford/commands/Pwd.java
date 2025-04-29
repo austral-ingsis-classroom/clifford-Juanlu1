@@ -11,20 +11,7 @@ public class Pwd {
         this.context = context;
     }
 
-    public String execute() {
-        StringBuilder path = new StringBuilder();
-        Directory dir = context.getCurrentDirectory();
-
-        while (dir != null) {
-            String name = dir.getName();
-            if (!name.equals("/")) {
-                path.insert(0, "/" + dir.getName());
-            }
-            dir = dir.getParent();
-        }
-        if (path.isEmpty()){
-            return "/";
-        }
-        return path.toString();
+    public System execute() {
+        return new System(context.currentPath(), context.root(),  context.currentPath());
     }
 }

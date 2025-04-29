@@ -1,18 +1,23 @@
 package edu.austral.ingsis.clifford;
 
-public class System {
+public record System(String currentPath, Directory root, String message) {
 
-    private Directory currentDir;
-
-    public System(Directory currentDir) {
-        this.currentDir = currentDir;
+    //currentDir() es el getter
+    public System(String currentPath, Directory root) {
+        this(currentPath, root, "");
     }
 
     public Directory getCurrentDirectory() {
-        return currentDir;
-    }
+        if (currentPath.equals("/")) {
+            return root;
+        }
+        String[] parts = currentPath.split("/");
+        Directory currentDir = root;
 
-    public void setCurrentDirectory(Directory newDirectory) {
-        this.currentDir = newDirectory;
+        for (int i = 1; i < parts.length; i++) {
+            String part = parts[i];
+            currentDir = (Directory) currentDir.getChild(part);
+        }
+        return currentDir;
     }
 }

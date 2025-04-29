@@ -12,13 +12,14 @@ public class Mkdir {
         this.directoryName = directoryName;
     }
 
-    public String execute() {
+    public System execute() {
         if (directoryName.contains("/") || directoryName.contains(" ")) {
-            return "Invalid directory name";
+            return new System(context.currentPath(), context.root(),"Invalid directory name");
         }
-        Directory currentDir = context.getCurrentDirectory();
-        Directory directory = new Directory(directoryName, currentDir.getRoot());
-        currentDir.add(directory);
-        return "'" + directoryName + "' directory created";
+        Directory root = context.root();
+        Directory newDir = new Directory(directoryName);
+
+        Directory updatedDir = root.add(context.currentPath(), newDir);
+        return new System(context.currentPath(), updatedDir, "'" + directoryName + "' directory created");
     }
 }

@@ -1,7 +1,7 @@
 package edu.austral.ingsis.clifford.commands;
 
 import edu.austral.ingsis.clifford.Directory;
-import edu.austral.ingsis.clifford.FileSystem;
+import edu.austral.ingsis.clifford.Element;
 import edu.austral.ingsis.clifford.System;
 
 public class Rm {
@@ -13,36 +13,25 @@ public class Rm {
         this.name = name;
     }
 
-    public String execute(){
-        Directory currentDir = context.getCurrentDirectory();
-        if (name.contains("recursive")){
-           name = name.substring("--recursive ".length()).trim();
-           FileSystem dir = currentDir.getChild(name);
-           if (dir == null) {
-               return "No such file or directory";
-           }
-           return removeRecursive((Directory) dir);
-        }
-        FileSystem file = currentDir.getChild(name);
-        if (file == null) {
-            return "No such file or directory";
-        }
-        else if (file.isDirectory()) {
-            return "cannot remove '" + file.getName() + "', is a directory";
-        } else {
-            currentDir.remove(file);
-            return "'" + name + "' removed";
-        }
-    }
+    public System execute() {
+        boolean recursive = false;
 
-    private String removeRecursive(Directory directory) {
-        for (FileSystem child : directory.list()) {
-            if (child.isDirectory()) {
-                removeRecursive((Directory) child);
-            }
-            directory.remove(child);
+        if (name.contains("recursive")) {
+            recursive = true;
+            name = name.substring("--recursive ".length()).trim();
         }
-        directory.getParent().remove(directory);
-        return "'" + directory.getName() + "' removed";
+
+        Element file = context.getCurrentDirectory().getChild(name);
+        Directory root = context.root();
+
+        if (file == null) {
+            return new System(context.currentPath(), root, "No such file or directory");
+        }
+        if (file.isDirectory() && !recursive) {
+            return new System(context.currentPath(), root, "cannot remove '" + file.getName() + "', is a directory");
+        }
+
+        Directory updatedDir = root.remove(context.currentPath(), file);
+        return new System(context.currentPath(), updatedDir, "'" + name + "' removed");
     }
 }

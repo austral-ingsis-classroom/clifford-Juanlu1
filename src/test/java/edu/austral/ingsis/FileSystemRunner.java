@@ -1,16 +1,17 @@
 package edu.austral.ingsis;
 
-import edu.austral.ingsis.clifford.Directory;
-
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiFunction;
+
+import edu.austral.ingsis.clifford.System;
 
 public class FileSystemRunner {
-  private final Map<String, Function<String, String>> commandMap;
-  public FileSystemRunner(Map<String, Function<String, String>> commandMap) {
+  private System context;
+  private final Map<String, BiFunction<System, String, System>> commandMap;
+  public FileSystemRunner(System context, Map<String, BiFunction<System, String, System>> commandMap) {
+    this.context = context;
     this.commandMap = commandMap;
   }
   public String executeCommand(String input) {
@@ -20,9 +21,10 @@ public class FileSystemRunner {
 
     //obtiene la funcion del comando y lo ejecuta (lo que le doy y lo que devuelve tiene)
 
-    Function<String, String> command = commandMap.get(commandName);
+    BiFunction<System, String, System> command = commandMap.get(commandName);
     if (command != null) {
-      return command.apply(text); //le aplica el texto
+      context = command.apply(context, text);
+      return context.message();
     } else {
       return "Command not found: " + commandName;
     }

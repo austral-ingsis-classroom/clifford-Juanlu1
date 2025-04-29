@@ -1,5 +1,6 @@
 package edu.austral.ingsis.clifford.commands;
 
+import edu.austral.ingsis.clifford.Directory;
 import edu.austral.ingsis.clifford.System;
 import edu.austral.ingsis.clifford.File;
 
@@ -12,12 +13,14 @@ public class Touch {
         this.fileName = fileName;
     }
 
-    public String execute() {
+    public System execute() {
         if (fileName.contains("/") || fileName.contains(" ")) {
-            return "Invalid file name";
+            return new System(context.currentPath(), context.root(), "Invalid file name");
         }
-        File file = new File(fileName);
-        context.getCurrentDirectory().add(file);
-        return "'" + fileName + "' file created";
+        Directory root = context.root();
+        File newfile = new File(fileName);
+
+        Directory updatedDir = root.add(context.currentPath(), newfile);
+        return new System (context.currentPath(), updatedDir, "'" + fileName + "' file created");
     }
 }

@@ -21,18 +21,19 @@ import org.junit.jupiter.api.Test;
 public class FileSystemTests {
 
   private FileSystemRunner runner;
-  private Directory rootDir;
   @BeforeEach
   public void setUp() {
-    rootDir = new Directory("/");
-    System context = new System(rootDir);
-    runner = new FileSystemRunner(Map.of(
-            "pwd", argument -> new Pwd(context).execute(),
-            "cd", argument -> new Cd(context, argument).execute(),
-            "ls", argument -> new Ls(context, argument).execute(),
-            "touch", argument -> new Touch(context, argument).execute(),
-            "mkdir", argument -> new Mkdir(context, argument).execute(),
-            "rm", argument -> new Rm(context, argument).execute()));
+    Directory root = new Directory("/");
+    System initialContext = new System("/", root);
+
+    runner = new FileSystemRunner( initialContext,Map.of(
+            "pwd", (context, text) -> new Pwd(context).execute(),
+            "cd", (context, text) -> new Cd(context, text).execute(),
+            "ls", (context, text) -> new Ls(context, text).execute(),
+            "touch", (context, text) -> new Touch(context, text).execute(),
+            "mkdir", (context, text) -> new Mkdir(context, text).execute(),
+            "rm", (context, text) -> new Rm(context, text).execute()
+    ));
   }
 
   private void executeTest(List<Map.Entry<String, String>> commandsAndResults) {

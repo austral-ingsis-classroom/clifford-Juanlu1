@@ -1,7 +1,7 @@
 package edu.austral.ingsis.clifford.commands;
 
 import edu.austral.ingsis.clifford.System;
-import edu.austral.ingsis.clifford.FileSystem;
+import edu.austral.ingsis.clifford.Element;
 
 import java.util.Comparator;
 import java.util.List;
@@ -15,10 +15,10 @@ public class Ls {
         this.order = order;
     }
 
-    public String execute() {
-        List<FileSystem> elements = context.getCurrentDirectory().list();
+    public System execute() {
+        List<Element> elements = context.getCurrentDirectory().children();
 
-        Comparator<FileSystem> comparator = Comparator.comparing(FileSystem::getName);
+        Comparator<Element> comparator = Comparator.comparing(Element::getName);
         if (order.contains("desc")) {
             comparator = comparator.reversed();
         }
@@ -27,12 +27,12 @@ public class Ls {
         }
 
         StringBuilder result = new StringBuilder();
-        for (FileSystem element : elements) {
+        for (Element element : elements) {
             result.append(element.getName()).append(" ");
         }
         if (!result.isEmpty()) {
             result.setLength(result.length() - 1);
         }
-        return result.toString();
+        return new System(context.currentPath(), context.root(), result.toString());
     }
 }
