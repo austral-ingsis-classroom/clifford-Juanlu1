@@ -3,9 +3,7 @@ package edu.austral.ingsis;
 import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.List;
-import java.util.Map;
-
+import edu.austral.ingsis.clifford.Directory;
 import edu.austral.ingsis.clifford.System;
 import edu.austral.ingsis.clifford.commands.Cd;
 import edu.austral.ingsis.clifford.commands.Ls;
@@ -13,27 +11,30 @@ import edu.austral.ingsis.clifford.commands.Mkdir;
 import edu.austral.ingsis.clifford.commands.Pwd;
 import edu.austral.ingsis.clifford.commands.Rm;
 import edu.austral.ingsis.clifford.commands.Touch;
-
-import edu.austral.ingsis.clifford.Directory;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class FileSystemTests {
 
   private FileSystemRunner runner;
+
   @BeforeEach
   public void setUp() {
     Directory root = new Directory("/");
     System initialContext = new System("/", root);
 
-    runner = new FileSystemRunner( initialContext,Map.of(
-            "pwd", (context, text) -> new Pwd(context).execute(),
-            "cd", (context, text) -> new Cd(context, text).execute(),
-            "ls", (context, text) -> new Ls(context, text).execute(),
-            "touch", (context, text) -> new Touch(context, text).execute(),
-            "mkdir", (context, text) -> new Mkdir(context, text).execute(),
-            "rm", (context, text) -> new Rm(context, text).execute()
-    ));
+    runner =
+        new FileSystemRunner(
+            initialContext,
+            Map.of(
+                "pwd", (context, text) -> new Pwd(context).execute(),
+                "cd", (context, text) -> new Cd(context, text).execute(),
+                "ls", (context, text) -> new Ls(context, text).execute(),
+                "touch", (context, text) -> new Touch(context, text).execute(),
+                "mkdir", (context, text) -> new Mkdir(context, text).execute(),
+                "rm", (context, text) -> new Rm(context, text).execute()));
   }
 
   private void executeTest(List<Map.Entry<String, String>> commandsAndResults) {

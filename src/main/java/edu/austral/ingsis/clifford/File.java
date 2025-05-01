@@ -2,12 +2,10 @@ package edu.austral.ingsis.clifford;
 
 public record File(String name) implements Element {
 
-    //record para que sea inmutable (mejor)
+  // record para que sea inmutable (mejor)
 
-    @Override
-    public String getName() { return name; }
-
-    @Override
-    public boolean isDirectory() { return false; }
-
-    }
+  @Override
+  public String getName() {
+    return name;
+  }
+}
